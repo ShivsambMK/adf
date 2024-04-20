@@ -1,0 +1,58 @@
+{
+	"name": "pl_folder_csv",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_set_var_api",
+				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "set_data",
+					"value": ""
+				}
+			},
+			{
+				"name": "act_reset_api",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "act_set_var_api",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"url": "https://datausa.io/api/data?drilldowns=Nation&measures=Population"
+				}
+			}
+		],
+		"variables": {
+			"set_data": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "adf_storage"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-03-24T06:16:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
