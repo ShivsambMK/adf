@@ -1,0 +1,84 @@
+{
+	"name": "pl_session_url",
+	"properties": {
+		"activities": [
+			{
+				"name": "web_url",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"url": "http://ergast.com/api/f1/seasons.json",
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					}
+				}
+			},
+			{
+				"name": "set_variable_url",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "web_url",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "yearwise_url",
+					"value": {
+						"value": "@{activity('web_url').output}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "copy_years",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "set_variable_url",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"enableStaging": false
+				}
+			}
+		],
+		"variables": {
+			"yearwise_url": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ingestion"
+		},
+		"annotations": []
+	}
+}
