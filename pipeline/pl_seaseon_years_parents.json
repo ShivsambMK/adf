@@ -1,0 +1,9 @@
+{
+	"name": "pl_seaseon_years_parents",
+	"properties": {
+		"folder": {
+			"name": "ingestion"
+		},
+		"annotations": []
+	}
+}
