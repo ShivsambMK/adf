@@ -1,28 +1,33 @@
 {
-	"name": "df_web_source_year",
+	"name": "df_url_year",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage2",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"file_name": {
+				"type": "String",
+				"defaultValue": "formula1_sesaon"
+			}
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "information.txt",
-				"container": "input"
+				"fileName": {
+					"value": "@dataset().file_name",
+					"type": "Expression"
+				},
+				"folderPath": "season",
+				"container": "output-formula1"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "",
 			"firstRowAsHeader": false,
 			"quoteChar": ""
 		},
-		"schema": [
-			{
-				"name": "hi how r u?",
-				"type": "String"
-			}
-		]
+		"schema": []
 	}
 }
