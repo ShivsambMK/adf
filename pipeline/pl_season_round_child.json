@@ -1,9 +1,9 @@
 {
-	"name": "pl_season_years_parents",
+	"name": "pl_season_round_child",
 	"properties": {
 		"activities": [
 			{
-				"name": "ac_web",
+				"name": "Web1",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"method": "GET",
-					"url": "http://ergast.com/api/f1/seasons.json?limit=100",
+					"url": {
+						"value": "@concat('http://ergast.com/api/f1/',pipeline().parameters.take_season_from_parents,'.json')",
+						"type": "Expression"
+					},
 					"connectVia": {
 						"referenceName": "AutoResolveIntegrationRuntime",
 						"type": "IntegrationRuntimeReference"
@@ -24,11 +27,11 @@
 				}
 			},
 			{
-				"name": "ac_get_year",
+				"name": "ForEach1",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "ac_web",
+						"activity": "Web1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -37,13 +40,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('ac_web').output.MRData.SeasonTable.Seasons",
+						"value": "@activity('Web1').output.MRData.RaceTable.races",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Web1",
+							"name": "Web2",
 							"type": "WebActivity",
 							"dependsOn": [],
 							"policy": {
@@ -57,7 +60,7 @@
 							"typeProperties": {
 								"method": "GET",
 								"url": {
-									"value": "@concat('http://ergast.com/api/f1/',item().season,'.json? limit=100')",
+									"value": "@concat('http://ergast.com/api/f1/',pipeline().parameters.take_season_from_parents,'/',item().round,'/','results.json? limit=100')",
 									"type": "Expression"
 								},
 								"connectVia": {
@@ -67,11 +70,11 @@
 							}
 						},
 						{
-							"name": "act_set_variable1",
+							"name": "set_var_round_wise",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "Web1",
+									"activity": "Web2",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -83,19 +86,19 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "year",
+								"variableName": "round_wise_data",
 								"value": {
-									"value": "@{activity('Web1').output.MRData.RaceTable.Races}",
+									"value": "@{activity('Web2').output.MRData.RaceTable.Races}",
 									"type": "Expression"
 								}
 							}
 						},
 						{
-							"name": "act_copy_schedule_season",
+							"name": "act_copy_sch_season",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "act_set_variable1",
+									"activity": "set_var_round_wise",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -116,7 +119,7 @@
 										{
 											"name": "col",
 											"value": {
-												"value": "@variables('year')",
+												"value": "@variables('round_wise_data')",
 												"type": "Expression"
 											}
 										}
@@ -172,72 +175,31 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_year_parents",
-									"type": "DatasetReference"
-								}
-							]
-						},
-						{
-							"name": "set_var_child",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Web1",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "take_year_parents",
-								"value": {
-									"value": "@item().season",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "act_Execute_child_Pipeline",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "set_var_child",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "pl_season_round_child",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"take_season_from_parents": {
-										"value": "@variables('take_year_parents')",
-										"type": "Expression"
+									"referenceName": "ds_sink_round_wise_data",
+									"type": "DatasetReference",
+									"parameters": {
+										"file_name_round": {
+											"value": "@item().round",
+											"type": "Expression"
+										},
+										"file_name_year": {
+											"value": "@pipeline().parameters.take_season_from_parents",
+											"type": "Expression"
+										}
 									}
 								}
-							}
+							]
 						}
 					]
 				}
 			}
 		],
+		"parameters": {
+			"take_season_from_parents": {
+				"type": "string"
+			}
+		},
 		"variables": {
-			"year": {
-				"type": "String"
-			},
 			"take_year_parents": {
 				"type": "String"
 			},
