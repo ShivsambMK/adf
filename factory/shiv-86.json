@@ -1,0 +1,9 @@
+{
+	"name": "shiv-86",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "45f7079b-5551-4e8f-b1e6-f555d45b774a",
+		"tenantId": "6d89aaa3-c80a-43cc-90d0-e0332540921b"
+	}
+}
